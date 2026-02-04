@@ -1,16 +1,18 @@
 #!/usr/bin/env node
 
 const { execSync } = require('child_process');
+const readline = require('readline');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
 
 // --- Config ---
-const CONTAINER_NAME = 'exegol-nicefox';
-const EXEGOL_SESSION = 'nicefox';
+const IMAGE_NAME = 'nicefox-tools';
+const CONTAINER_NAME = 'nicefox-tools';
 const HOME_DIR = path.join(os.homedir(), '.nicefox-secu');
 const PROMPT_SRC = path.join(__dirname, '..', 'prompt', 'PENTEST.md');
 const PROMPT_DEST = path.join(HOME_DIR, 'PENTEST.md');
+const DOCKERFILE = path.join(__dirname, '..', 'docker', 'Dockerfile');
 
 // --- Colors ---
 const green = (s) => `\x1b[32m${s}\x1b[0m`;
@@ -33,79 +35,124 @@ function fail(msg) {
   process.exit(1);
 }
 
-// ─────────────────────────────────────────
-//  NiceFox Secu
-// ─────────────────────────────────────────
+function ask(question) {
+  return new Promise((resolve) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase());
+    });
+  });
+}
 
-console.log('');
-console.log(bold('  NiceFox Secu'));
-console.log(dim('  AI-powered pentesting for web developers'));
-console.log('');
+async function main() {
+  console.log('');
+  console.log(bold('  NiceFox Secu'));
+  console.log(dim('  AI-powered pentesting for web developers'));
+  console.log('');
 
-// --- Step 1: Check Docker ---
-if (run('docker info') === null) {
-  fail(`Docker is not running.
+  // --- Step 1: Check Docker ---
+  if (run('docker info') === null) {
+    fail(`Docker is not running.
 
   Start Docker Desktop (or the Docker daemon) and try again.
 
   Install Docker: ${cyan('https://docs.docker.com/get-docker/')}`);
-}
-console.log(`  ${green('✓')} Docker is running`);
+  }
+  console.log(`  ${green('✓')} Docker is running`);
 
-// --- Step 2: Check / start Exegol container ---
-const containerRunning = run(
-  `docker ps --filter "name=^${CONTAINER_NAME}$" --format "{{.Names}}"`
-);
+  // --- Step 2: Build image if missing ---
+  const imageExists = run(`docker images -q ${IMAGE_NAME}`);
 
-if (containerRunning === CONTAINER_NAME) {
-  console.log(`  ${green('✓')} Exegol container ready (${CONTAINER_NAME})`);
-} else {
-  // Container exists but stopped?
-  const containerExists = run(
-    `docker ps -a --filter "name=^${CONTAINER_NAME}$" --format "{{.Names}}"`
-  );
-
-  if (containerExists === CONTAINER_NAME) {
-    process.stdout.write(`  ${yellow('→')} Starting stopped container ${CONTAINER_NAME}...`);
-    if (run(`docker start ${CONTAINER_NAME}`) === null) {
+  if (!imageExists) {
+    console.log('');
+    console.log(`  The security toolkit needs to be installed (Docker image, ${bold('~1 GB')}).`);
+    console.log(`  This only happens once.`);
+    console.log('');
+    const answer = await ask(`  Install it? ${dim('(Y/n)')} `);
+    if (answer === 'n' || answer === 'no') {
       console.log('');
-      fail(`Failed to start container ${CONTAINER_NAME}.
+      console.log(dim('  No problem. Run npx nicefox-secu again when you\'re ready.'));
+      console.log('');
+      process.exit(0);
+    }
+    console.log('');
+    console.log(`  ${yellow('→')} Building security toolkit...`);
+    console.log('');
+    try {
+      execSync(
+        `docker build -t ${IMAGE_NAME} -f "${DOCKERFILE}" "${path.dirname(DOCKERFILE)}"`,
+        { stdio: 'inherit' }
+      );
+    } catch {
+      fail(`Failed to build the security toolkit image.
 
   Try manually:
-    docker start ${CONTAINER_NAME}`);
+    ${cyan(`docker build -t ${IMAGE_NAME} -f "${DOCKERFILE}" "${path.dirname(DOCKERFILE)}"`)}`);
     }
-    console.log(` ${green('done')}`);
-    console.log(`  ${green('✓')} Exegol container running (${CONTAINER_NAME})`);
+    console.log('');
+    console.log(`  ${green('✓')} Security toolkit installed`);
   } else {
-    // Container doesn't exist at all
-    fail(`Exegol container "${CONTAINER_NAME}" not found.
-
-  Set it up in 2 steps:
-
-  ${bold('1. Install Exegol (one-time):')}
-     ${cyan('https://docs.exegol.com/first-install')}
-
-  ${bold('2. Create the container:')}
-     ${cyan(`exegol start ${EXEGOL_SESSION}`)}
-     When prompted, select the ${bold("'free'")} image (community)
-     or ${bold("'web'/'full'")} if you have a Pro subscription.
-
-  Then run ${cyan('npx nicefox-secu')} again.`);
+    console.log(`  ${green('✓')} Security toolkit ready`);
   }
+
+  // --- Step 3: Start container if not running ---
+  const containerRunning = run(
+    `docker ps --filter "name=^${CONTAINER_NAME}$" --format "{{.Names}}"`
+  );
+
+  if (containerRunning === CONTAINER_NAME) {
+    console.log(`  ${green('✓')} Toolkit container running`);
+  } else {
+    const containerExists = run(
+      `docker ps -a --filter "name=^${CONTAINER_NAME}$" --format "{{.Names}}"`
+    );
+
+    if (containerExists === CONTAINER_NAME) {
+      // Stopped — restart it
+      process.stdout.write(`  ${yellow('→')} Starting toolkit container...`);
+      if (run(`docker start ${CONTAINER_NAME}`) === null) {
+        console.log('');
+        fail(`Failed to start container.
+
+  Try manually:
+    ${cyan(`docker start ${CONTAINER_NAME}`)}`);
+      }
+      console.log(` ${green('done')}`);
+    } else {
+      // Create new container with platform-aware networking
+      const isLinux = process.platform === 'linux';
+      const networkFlag = isLinux ? '--network=host' : '';
+
+      process.stdout.write(`  ${yellow('→')} Creating toolkit container...`);
+      const runCmd = `docker run -d --name ${CONTAINER_NAME} ${networkFlag} ${IMAGE_NAME}`.replace(/\s+/g, ' ');
+      if (run(runCmd) === null) {
+        console.log('');
+        fail(`Failed to create container.
+
+  Try manually:
+    ${cyan(runCmd)}`);
+      }
+      console.log(` ${green('done')}`);
+    }
+    console.log(`  ${green('✓')} Toolkit container running`);
+  }
+
+  // --- Step 4: Install prompt to ~/.nicefox-secu/ ---
+  if (!fs.existsSync(HOME_DIR)) {
+    fs.mkdirSync(HOME_DIR, { recursive: true });
+  }
+  fs.copyFileSync(PROMPT_SRC, PROMPT_DEST);
+  console.log(`  ${green('✓')} Prompt installed`);
+
+  // --- Step 5: Print instructions ---
+  console.log('');
+  console.log(`  ${bold('Ready!')} Open your AI coding agent from your project directory and paste:`);
+  console.log('');
+  console.log(`    ${cyan(`Read ${PROMPT_DEST} and start the pentest`)}`);
+  console.log('');
+  console.log(dim('  Works with Claude Code, Codex, opencode, Cursor, Kimi, aider...'));
+  console.log('');
 }
 
-// --- Step 3: Install prompt to ~/.nicefox-secu/ ---
-if (!fs.existsSync(HOME_DIR)) {
-  fs.mkdirSync(HOME_DIR, { recursive: true });
-}
-fs.copyFileSync(PROMPT_SRC, PROMPT_DEST);
-console.log(`  ${green('✓')} Prompt installed`);
-
-// --- Step 4: Print instructions ---
-console.log('');
-console.log(`  ${bold('Ready!')} Open your AI coding agent from your project directory and paste:`);
-console.log('');
-console.log(`    ${cyan(`Read ${PROMPT_DEST} and start the pentest`)}`);
-console.log('');
-console.log(dim('  Works with Claude Code, Codex, opencode, Cursor, Kimi, aider...'));
-console.log('');
+main();

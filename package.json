@@ -1,13 +1,14 @@
 {
   "name": "nicefox-secu",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Zero-config AI-powered pentesting for web developers",
   "bin": {
     "nicefox-secu": "./bin/cli.js"
   },
   "files": [
     "bin/",
-    "prompt/"
+    "prompt/",
+    "docker/"
   ],
   "keywords": [
     "pentest",
