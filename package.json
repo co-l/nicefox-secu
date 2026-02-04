@@ -1,0 +1,28 @@
+{
+  "name": "nicefox-secu",
+  "version": "1.0.0",
+  "description": "Zero-config AI-powered pentesting for web developers",
+  "bin": {
+    "nicefox-secu": "./bin/cli.js"
+  },
+  "files": [
+    "bin/",
+    "prompt/"
+  ],
+  "keywords": [
+    "pentest",
+    "security",
+    "pentesting",
+    "web-security",
+    "api-security",
+    "ai",
+    "exegol",
+    "vulnerability-scanner"
+  ],
+  "author": "co-l",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/co-l/simple-pentest.git"
+  }
+}

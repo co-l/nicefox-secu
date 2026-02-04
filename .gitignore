@@ -4,3 +4,6 @@ reports/*.md
 
 # AIDA symlinks (development only)
 *_link*
+
+# Node
+node_modules/
