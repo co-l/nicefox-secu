@@ -77,10 +77,11 @@ docker exec nicefox-tools <command>
 ```
 
 **Rules:**
-- Always use the specialized tool for the job. `curl` is only for manual HTTP requests and quick API probing — never as a replacement for scanners and fuzzers.
+- **You MUST run every applicable tool from the Tool Selection table below.** Do not replicate tool functionality with `curl` or scripts — use the dedicated tool. For example, use `sqlmap` for SQLi (not manual curl payloads), `dalfox` for XSS (not manual injection), `jwt_tool` for JWT attacks (not Python scripts), `hydra` for brute force (not bash loops).
+- If a tool crashes or fails, **retry with reduced scope or concurrency** (e.g., add `-c 10 -rl 50` for nuclei, remove `-sC` for nmap) before skipping. Document the failure and workaround.
 - Wordlist paths (e.g., `/usr/share/wordlists/...`) are paths **inside the container** — they work as-is within `docker exec`.
 - Prefer stdout output. Avoid file-writing flags (`-oN`, `-o`, `--output-dir`). To save output, redirect on the host side: `docker exec nicefox-tools nmap -sV target > reports/nmap.txt`
-- Standard host tools (`curl`, `jq`, `base64`, `python3`) run directly on the host without `docker exec`.
+- Standard host tools (`curl`, `jq`, `base64`, `python3`) run directly on the host without `docker exec`. Use `curl` only for manual HTTP requests and quick API probing.
 
 ### Networking
 
@@ -97,7 +98,7 @@ Use the right tool for each task. Every tool below runs inside the container via
 | Subdomain enumeration | **subfinder** | `docker exec nicefox-tools subfinder -d example.com -silent` |
 | Directory & endpoint discovery | **ffuf** | `docker exec nicefox-tools ffuf -u http://localhost:3000/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc all -fc 404` |
 | Parameter discovery | **arjun** | `docker exec nicefox-tools arjun -u http://localhost:3000/api/endpoint` |
-| Known CVEs & misconfigurations | **nuclei** | `docker exec nicefox-tools nuclei -u http://localhost:3000 -as` |
+| Known CVEs & misconfigurations | **nuclei** | `docker exec nicefox-tools nuclei -u http://localhost:3000 -as -c 10 -rl 50` |
 | SQL injection | **sqlmap** | `docker exec nicefox-tools sqlmap -u "http://localhost:3000/api/search?q=test" --batch --level=3` |
 | XSS testing | **dalfox** | `docker exec nicefox-tools dalfox url "http://localhost:3000/search?q=test"` |
 | JWT analysis & attacks | **jwt_tool** | `docker exec nicefox-tools python3 /opt/jwt_tool/jwt_tool.py <token> -A` |
@@ -207,6 +208,22 @@ This is the core phase. Use the specialized tool for each vulnerability type: **
 - **Security headers** → add Strict-Transport-Security, X-Content-Type-Options, X-Frame-Options
 - **Information disclosure** → disable debug mode, stack traces, and version headers in production config
 - **ReDoS** → simplify regex patterns, add input length limits, use non-backtracking engines if available
+
+## Tool Coverage Check
+
+Before moving to final verification, confirm you ran every applicable tool. For each one, note the result or justify why it was skipped:
+
+- [ ] **nmap** — port scan & service detection
+- [ ] **ffuf** — directory & endpoint fuzzing
+- [ ] **nuclei** — known CVEs & misconfigurations
+- [ ] **arjun** — parameter discovery on key endpoints
+- [ ] **sqlmap** — SQL injection on every endpoint accepting user input
+- [ ] **dalfox** — XSS on every endpoint reflecting user input
+- [ ] **jwt_tool** — JWT analysis (if the app uses JWTs)
+- [ ] **hydra** — brute force on login/register endpoints
+- [ ] **subfinder** — subdomain enumeration (production targets only)
+
+If a tool was not run, go back and run it now. The only valid reason to skip is "not applicable to this target" (e.g., subfinder on localhost, sqlmap when there are no SQL-backed endpoints).
 
 ## Phase 4 — Final Verification
 
