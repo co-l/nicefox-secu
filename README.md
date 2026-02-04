@@ -42,7 +42,7 @@ Once Exegol is installed, start the pentesting container:
 
 ```bash
 exegol start pentest
-# Select 'web' or 'full' image when prompted
+# Select 'free' image (community) or 'web'/'full' if you have a Pro subscription
 ```
 
 ### 3. Launch Your AI Agent
@@ -174,7 +174,7 @@ The AI auto-detects common frameworks for better fix recommendations:
 
 ```bash
 # Setup (run once)
-$ exegol start pentest   # select 'web' or 'full' image
+$ exegol start pentest   # select 'free' (community) or 'web'/'full' (Pro)
 [*] Container ready
 
 # Launch your AI agent on the host machine
