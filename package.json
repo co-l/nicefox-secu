@@ -1,6 +1,6 @@
 {
   "name": "nicefox-secu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Zero-config AI-powered pentesting for web developers",
   "bin": {
     "nicefox-secu": "./bin/cli.js"
@@ -23,6 +23,6 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/co-l/simple-pentest.git"
+    "url": "git+https://github.com/co-l/nicefox-secu.git"
   }
 }
