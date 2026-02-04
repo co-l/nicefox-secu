@@ -1,0 +1,227 @@
+# {project} Pentest Findings
+
+**Project:** {project}  
+**Target:** {target_url}  
+**Environment:** {dev_or_production}  
+**Assessment Date:** {date}  
+**Assessor:** AI Security Assistant
+
+---
+
+## Executive Summary
+
+**Overall Risk Rating:** {CRITICAL/HIGH/MEDIUM/LOW}
+
+Brief overview of the security assessment findings and overall security posture.
+
+### Key Findings
+
+- **Total Vulnerabilities:** {count}
+- **Critical:** {count}
+- **High:** {count}
+- **Medium:** {count}
+- **Low:** {count}
+- **Informational:** {count}
+
+### Risk Summary
+
+{2-3 sentences summarizing the most critical issues and their potential impact}
+
+---
+
+## Methodology
+
+This assessment followed a systematic 4-phase approach:
+
+1. **Reconnaissance** - DNS enumeration, subdomain discovery, technology identification, port scanning
+2. **Mapping** - Endpoint discovery, API enumeration, parameter identification
+3. **Vulnerability Assessment** - Manual and automated testing for common vulnerabilities
+4. **Exploitation** - Validation of findings with proof-of-concept demonstrations
+
+Testing was conducted in a {dev/production} environment with {full/limited} testing scope.
+
+---
+
+## Findings
+
+### VULN-001: {Vulnerability Title}
+
+**Severity:** {CRITICAL/HIGH/MEDIUM/LOW/INFO}  
+**Status:** {Confirmed/Fixed/Still Vulnerable}  
+**Endpoint:** {HTTP_METHOD} {endpoint_path}  
+**CVSS Score:** {X.X}
+
+#### Description
+
+{Detailed description of the vulnerability, what it is, and how it manifests}
+
+#### Proof of Concept
+
+**Command Used:**
+```bash
+{exact command used to discover/exploit}
+```
+
+**Request:**
+```http
+{HTTP request if applicable}
+```
+
+**Response:**
+```http
+{HTTP response showing vulnerability}
+```
+
+**Output:**
+```
+{raw output from command execution}
+```
+
+#### Impact
+
+{Description of what an attacker could achieve by exploiting this vulnerability}
+
+#### Affected Components
+
+- {File/Component 1}
+- {File/Component 2}
+- {Parameter/Endpoint}
+
+#### Remediation
+
+{High-level remediation guidance. Detailed code fixes are in {project}_pentest_fixes.md}
+
+#### References
+
+- {CVE-ID if applicable}
+- {OWASP reference}
+- {External resource}
+
+---
+
+### VULN-002: {Vulnerability Title}
+
+[Repeat structure for each vulnerability]
+
+---
+
+## Reconnaissance Results
+
+### Subdomains Discovered
+
+```
+{list of subdomains found}
+```
+
+### Technology Stack
+
+- **Web Server:** {e.g., nginx 1.18.0}
+- **Framework:** {e.g., Express.js 4.17.1}
+- **Language:** {e.g., Node.js 14.17.0}
+- **Database:** {e.g., PostgreSQL 13}
+- **Additional:** {other technologies detected}
+
+### Open Ports
+
+```
+{Port}  {Service}  {Version}
+```
+
+### SSL/TLS Configuration
+
+```
+{SSL scan results summary}
+```
+
+---
+
+## API Endpoints Discovered
+
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | /api/v1/users | List users | Yes |
+| POST | /api/v1/users | Create user | Yes |
+| GET | /api/v1/users/{id} | Get user | Yes |
+| ... | ... | ... | ... |
+
+---
+
+## Verification Results
+
+**Verification Date:** {date}  
+**Status:** {In Progress/Complete}
+
+| Vulnerability | Original Severity | Status | Notes |
+|---------------|------------------|--------|-------|
+| VULN-001 | Critical | Fixed ✓ | Fix verified on {date} |
+| VULN-002 | High | Fixed ✓ | Fix verified on {date} |
+| VULN-003 | High | Still Vulnerable ✗ | Fix incomplete |
+| ... | ... | ... | ... |
+
+---
+
+## Appendix A: All Commands Executed
+
+```bash
+# Reconnaissance
+{commands run during recon phase}
+
+# Mapping
+{commands run during mapping phase}
+
+# Vulnerability Assessment
+{commands run during vuln assessment}
+
+# Exploitation
+{commands run during exploitation}
+```
+
+---
+
+## Appendix B: Tools Used
+
+- nmap {version}
+- subfinder {version}
+- amass {version}
+- ffuf {version}
+- gobuster {version}
+- sqlmap {version}
+- {other tools}
+
+---
+
+## Appendix C: Timeline
+
+| Phase | Start Time | End Time | Duration |
+|-------|------------|----------|----------|
+| Reconnaissance | {time} | {time} | {duration} |
+| Mapping | {time} | {time} | {duration} |
+| Vulnerability Assessment | {time} | {time} | {duration} |
+| Exploitation | {time} | {time} | {duration} |
+| Reporting | {time} | {time} | {duration} |
+
+---
+
+## Disclaimer
+
+This security assessment was conducted in a {dev/production} environment with the following scope and limitations:
+
+- Testing was performed on: {target_url}
+- Timeframe: {start_date} to {end_date}
+- Environment: {dev/production}
+- Authorization: {authorized/unauthorized} testing
+
+The findings represent a point-in-time assessment and may not reflect the current security posture if changes have been made since the assessment date.
+
+---
+
+## Next Steps
+
+1. **Review Findings** - Examine all vulnerabilities and their severity
+2. **Generate Fixes** - Run: "Look at FIXES.md and generate fix recommendations for {project}"
+3. **Implement Fixes** - Apply code fixes from {project}_pentest_fixes.md
+4. **Verify Fixes** - Return to this session and run: "Verify all findings from {project}_pentest_findings.md"
+
+---
+
+*Report generated by AI Security Assistant using the Simple Pentest Kit methodology*
