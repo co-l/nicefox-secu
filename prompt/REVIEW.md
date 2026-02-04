@@ -65,28 +65,32 @@ docker exec nicefox-tools <command>
 ```
 
 **Rules:**
+- Always use the specialized tool for the job. `curl` is only for manual HTTP requests and quick API probing — never as a replacement for scanners and fuzzers.
 - Wordlist paths (e.g., `/usr/share/wordlists/...`) are paths **inside the container** — they work as-is within `docker exec`.
 - Prefer stdout output. Avoid file-writing flags (`-oN`, `-o`, `--output-dir`). To save output, redirect on the host side: `docker exec nicefox-tools nmap -sV target > reports/nmap.txt`
-- Standard host tools (`curl`, `jq`, `base64`, `python3`) run directly without `docker exec`.
+- Standard host tools (`curl`, `jq`, `base64`, `python3`) run directly on the host without `docker exec`.
 
 ### Networking
 
 - **Linux**: The container uses host networking — `localhost` inside the container reaches the host directly.
 - **macOS / Windows**: Replace `localhost` or `127.0.0.1` with `host.docker.internal` in tool commands to reach services running on the host.
 
-### Available Tools (inside the container)
+### Tool Selection
 
-| Category | Tools |
-|---|---|
-| **Recon** | nmap, subfinder |
-| **Vuln scanning** | nuclei (template-based, huge community library) |
-| **Web discovery** | ffuf |
-| **Parameters** | arjun |
-| **SQL injection** | sqlmap (always use `--batch` flag) |
-| **XSS** | dalfox |
-| **API testing** | httpie, curl |
-| **JWT** | jwt_tool |
-| **Brute force** | hydra |
+Use the right tool for each task. Every tool below runs inside the container via `docker exec nicefox-tools`.
+
+| Task | Tool | Example |
+|---|---|---|
+| Port scan & service detection | **nmap** | `docker exec nicefox-tools nmap -sV -sC localhost` |
+| Subdomain enumeration | **subfinder** | `docker exec nicefox-tools subfinder -d example.com -silent` |
+| Directory & endpoint discovery | **ffuf** | `docker exec nicefox-tools ffuf -u http://localhost:3000/FUZZ -w /usr/share/wordlists/dirb/common.txt -mc all -fc 404` |
+| Parameter discovery | **arjun** | `docker exec nicefox-tools arjun -u http://localhost:3000/api/endpoint` |
+| Known CVEs & misconfigurations | **nuclei** | `docker exec nicefox-tools nuclei -u http://localhost:3000 -as` |
+| SQL injection | **sqlmap** | `docker exec nicefox-tools sqlmap -u "http://localhost:3000/api/search?q=test" --batch --level=3` |
+| XSS testing | **dalfox** | `docker exec nicefox-tools dalfox url "http://localhost:3000/search?q=test"` |
+| JWT analysis & attacks | **jwt_tool** | `docker exec nicefox-tools python3 /opt/jwt_tool/jwt_tool.py <token> -A` |
+| Brute force (auth) | **hydra** | `docker exec nicefox-tools hydra -l admin -P /usr/share/wordlists/seclists/Passwords/10k-most-common.txt localhost http-post-form "/login:user=^USER^&pass=^PASS^:Invalid"` |
+| HTTP requests & API probing | **httpie** | `docker exec nicefox-tools http GET http://localhost:3000/api/users` |
 
 ### Wordlist Paths (inside the container)
 
@@ -150,15 +154,17 @@ Each assessment is unique. Adapt tools, techniques, and phase order based on the
 
 DNS, WHOIS, subdomains, tech stack, SSL/TLS, OSINT, port scans, service detection, API documentation discovery (Swagger, OpenAPI, GraphQL introspection).
 
-Use the framework detected in Phase 0 to guide which vulnerabilities to prioritize and how to write fixes.
+Use **nmap** for port scanning and service detection. Use **subfinder** for subdomain enumeration (production targets). Use the framework detected in Phase 0 to guide which vulnerabilities to prioritize and how to write fixes.
 
 ## Phase 2 — Mapping
 
 Directories, endpoints, API enumeration, parameter discovery, version detection, authentication mechanism mapping.
 
+Use **ffuf** for directory and endpoint fuzzing. Use **arjun** to discover hidden parameters on interesting endpoints. Use **nuclei** for a broad scan of known CVEs and misconfigurations.
+
 ## Phase 3 — Vulnerability Assessment & Fix
 
-This is the core phase. For each potential vulnerability:
+This is the core phase. Use the specialized tool for each vulnerability type: **sqlmap** for SQL injection, **dalfox** for XSS, **jwt_tool** for JWT attacks, **hydra** for brute force on authentication endpoints. For each potential vulnerability:
 
 1. **Test it** — run the exploit/PoC to confirm it's real
 2. **Document it** — add a VULN-NNN entry to the findings report immediately
