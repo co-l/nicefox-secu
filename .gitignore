@@ -1,6 +1,6 @@
 # Pentest report outputs (generated per-project)
-reports/*_pentest_findings.md
-reports/*_pentest_fixes.md
-
-# Keep the reports directory itself
+reports/*.md
 !reports/.gitkeep
+
+# AIDA symlinks (development only)
+*_link*

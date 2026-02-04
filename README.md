@@ -1,13 +1,19 @@
 # Simple Pentest Kit
 
-A lightweight, AI-driven API penetration testing framework that works directly with your AI agent - no complex infrastructure needed.
+AI-powered security testing for web developers. Find vulnerabilities in your API, fix them in your code, and verify the fixes — all in one session.
 
-## Overview
+Based on the [AIDA](https://github.com/Vasco0x4/AIDA) methodology, simplified for developers who aren't security experts.
 
-This kit provides a streamlined pentesting workflow with three clear phases:
-1. **Findings** - Conduct comprehensive security assessment
-2. **Fixes** - Generate prioritized, code-level remediation guidance  
-3. **Verify** - Re-test to confirm vulnerabilities are resolved
+## How It Works
+
+You launch an AI coding agent and point it at your API. The AI:
+
+1. **Pentests** your API (recon, endpoint mapping, vulnerability testing)
+2. **Fixes** each vulnerability directly in your source code as it finds them
+3. **Verifies** each fix works by re-testing the endpoint
+4. **Generates a report** summarizing what was found, fixed, and what needs manual attention
+
+**Output:** `reports/{project}_pentest_report.md` + your code is patched.
 
 ## Prerequisites
 
@@ -23,7 +29,7 @@ You need **Docker**, **Python 3**, **Git**, and an **AI coding agent** (Claude C
 > - **Linux** is recommended for best performance and full compatibility with Exegol.
 > - **macOS**: Works well. OrbStack is preferred over Docker Desktop for performance.
 > - **Windows**: Run from a **WSL 2** terminal for best compatibility. Docker Desktop must have the WSL 2 backend enabled.
-> - **macOS & Windows**: Docker Desktop has limitations with host network interfaces and USB device access, which may affect some scan types (e.g., certain nmap raw socket scans). See the [Exegol docs](https://docs.exegol.com/first-install/) for details.
+> - **macOS & Windows**: Docker Desktop has limitations with host network interfaces, which may affect some scan types (e.g., certain nmap raw socket scans). See the [Exegol docs](https://docs.exegol.com/first-install/) for details.
 
 ## Quick Start
 
@@ -56,172 +62,84 @@ opencode  # or claude, aider, etc.
 > The container just needs to be running in the background — the AI reaches its pentesting
 > tools via `docker exec exegol-pentest <command>`.
 
-### 4. Start Pentesting
-
-Use this prompt to begin:
+### 4. Start
 
 ```
-Look at prompts/01-recon-and-pentest.md and start by asking my project parameters
+Look at prompts/pentest.md and start
 ```
 
-The AI will ask you:
-- **Project source path**: Location of your codebase (for fix generation)
+The AI will ask you 3 questions:
+- **Project source path**: Where your code lives (so it can fix it)
 - **Target URL**: The API endpoint to test
-- **Environment**: Dev or Production (affects testing intensity)
+- **Environment**: Dev or Production
 
-## Workflow
-
-### Phase 1: Pentest
-
-The AI conducts a 4-phase security assessment:
-- **Reconnaissance** - DNS, subdomains, tech stack, ports
-- **Mapping** - Endpoint discovery, API enumeration
-- **Vulnerability Assessment** - Test for SQLi, XSS, IDOR, auth bypass, etc.
-- **Exploitation** - Validate findings with proof-of-concept
-
-**Output**: `reports/{project}_pentest_findings.md`
-
-### Phase 2: Fixes
-
-After the pentest completes, the AI will tell you:
-
-> "Pentest complete. Now look at prompts/02-fixes.md to generate fix recommendations."
-
-Start a new AI agent session and use:
-
-```
-Look at prompts/02-fixes.md and generate fix recommendations for {project}
-```
-
-The AI will:
-- Analyze your source code for framework detection
-- Generate code-level fixes with examples
-- Prioritize by severity (Critical → High → Medium → Low)
-
-**Output**: `reports/{project}_pentest_fixes.md`
-
-### Phase 3: Implementation
-
-Take the fixes file to your project and implement all recommendations.
-
-### Phase 4: Verify
-
-Return to your **original pentest AI session** and use the verification prompt provided earlier:
-
-```
-Verify all findings from reports/{project}_pentest_findings.md
-```
-
-The AI will:
-- Re-test ALL previous findings
-- Mark each as fixed or still vulnerable
-- Offer new fix prompts for remaining issues
-- Update the findings report with verification results
-
-## Files Reference
-
-### For Humans (Documentation)
-
-| File | Purpose |
-|------|---------|
-| `README.md` | This file - setup and workflow guide |
-| `templates/findings_template.md` | Report structure template |
-| `reports/` | Output directory for pentest findings and fixes (gitignored) |
-
-### For AI (Prompts)
-
-| File | Purpose |
-|------|---------|
-| `prompts/01-recon-and-pentest.md` | Step 1: Reconnaissance & pentesting methodology |
-| `prompts/02-fixes.md` | Step 2: Fix generation with framework detection |
-| `prompts/03-verify.md` | Step 3: Verification & re-testing workflow |
-| `prompts/utils/tools-reference.md` | Tool reference and command examples |
-
-## Important Notes
-
-### Environment Differences
-
-**Development Environment:**
-- Full testing suite enabled
-- Aggressive scanning allowed
-- Database manipulation permitted
-- All exploitation techniques available
-
-**Production Environment:**
-- Non-destructive tests only
-- Rate limiting respected
-- No data modification
-- Extra confirmation prompts for risky tests
-
-### Safety Guidelines
-
-- **Always** verify you have permission to test the target
-- **Never** test production systems without explicit authorization
-- **Backup** databases before testing in dev environments
-- **Document** all commands run for accountability
-
-### Framework Support
-
-The AI auto-detects common frameworks for better fix recommendations:
-- **Python**: Django, Flask, FastAPI
-- **Node.js**: Express, NestJS, Koa
-- **Go**: Gin, Echo, Fiber
-- **Java**: Spring Boot, Jakarta EE
-- **Ruby**: Rails, Sinatra
-- **PHP**: Laravel, Symfony
+Then it goes to work. Come back to fixed code and a report.
 
 ## Example Session
 
 ```bash
-# Setup (run once)
-$ exegol start pentest   # select 'free' (community) or 'web'/'full' (Pro)
-[*] Container ready
-
-# Launch your AI agent on the host machine
+$ exegol start pentest
 $ cd /path/to/simple-pentest
 $ opencode  # or claude, aider, etc.
 
-# In your AI agent:
-> Look at prompts/01-recon-and-pentest.md and start by asking my project parameters
+> Look at prompts/pentest.md and start
 
 AI: What is the path to your project source code?
-You: /home/user/projects/leangraph
+You: /home/user/projects/myapi
 
 AI: What is the target URL to test?
-You: https://api.leangraph.io
+You: http://localhost:3000
 
 AI: Is this a development or production environment?
 You: dev
 
-[AI conducts 4-phase pentest, running tools via docker exec exegol-pentest...]
+[AI scans your API, discovers endpoints, tests for vulnerabilities...]
 
-AI: Pentest complete. Generated reports/leangraph_pentest_findings.md
-    Now look at prompts/02-fixes.md to generate fix recommendations.
+AI: Found VULN-001: SQL Injection in POST /api/search (CRITICAL)
+    Fixing src/routes/search.js — switching to parameterized query...
+    Fix verified — endpoint now returns 400 on injection attempt.
 
-# Terminal 2: New AI agent session for fixes
-$ opencode  # or claude, aider, etc.
+AI: Found VULN-002: Missing rate limiting on POST /api/login (MEDIUM)
+    Fixing src/routes/auth.js — adding express-rate-limit...
+    Fix verified — returns 429 after 5 attempts.
 
-# In your AI agent:
-> Look at prompts/02-fixes.md and generate fix recommendations for leangraph
+AI: Found VULN-003: CORS allows all origins (MEDIUM)
+    Fixing src/app.js — restricting to specific origins...
+    Fix verified — cross-origin request from evil.com now blocked.
 
-[AI analyzes source code and generates fixes...]
+[AI does final verification pass...]
 
-AI: Generated reports/leangraph_pentest_fixes.md with prioritized fixes
-
-# You implement fixes in your project...
-
-# Terminal 1: Back to original session
-> Verify all findings from reports/leangraph_pentest_findings.md
-
-[AI re-tests all findings...]
-
-AI: Verification complete:
-    - 3 findings FIXED ✓
-    - 1 finding STILL VULNERABLE ✗
-    
-    Would you like me to generate additional fix recommendations
-    for the remaining vulnerability?
+AI: Assessment complete. Generated reports/myapi_pentest_report.md
+    Found 3 vulnerabilities, fixed 3.
+    Review the report for details.
 ```
+
+## Environment Differences
+
+**Development** (recommended for first use):
+- Full testing suite, aggressive scanning
+- AI edits your source code directly to fix vulnerabilities
+- All exploitation techniques allowed
+
+**Production**:
+- Non-destructive tests only, rate limits respected
+- AI documents recommended fixes but does NOT edit code
+- Extra confirmation prompts for risky tests
+
+## Safety
+
+- **Always** test against a dev/staging environment first
+- **Never** test production systems without explicit authorization
+- **Backup** your code before running (or just use git)
+- The AI will **not modify production code** — it only documents fixes in prod mode
+
+## Files
+
+| File | Purpose |
+|------|---------|
+| `prompts/pentest.md` | The AI prompt — pentest + fix + verify methodology |
+| `prompts/utils/tools-reference.md` | Tool command reference for the AI |
+| `reports/` | Output directory for reports (gitignored) |
 
 ## Troubleshooting
 
@@ -229,38 +147,29 @@ For Exegol installation issues, see the [official docs](https://docs.exegol.com/
 
 ### Container won't start
 ```bash
-# Check Docker is running
-docker info
-
-# List existing Exegol containers
-exegol info
-
-# Remove conflicting container and recreate
-exegol stop pentest
-exegol remove pentest
-exegol start pentest
+docker info                   # Check Docker is running
+exegol info                   # List existing containers
+exegol stop pentest           # Stop conflicting container
+exegol remove pentest         # Remove it
+exegol start pentest          # Recreate
 ```
 
 ### Tools not responding via docker exec
 ```bash
-# Verify the container is running
-docker ps | grep exegol-pentest
-
-# Test a tool manually
-docker exec exegol-pentest nmap --version
+docker ps | grep exegol-pentest              # Verify container is running
+docker exec exegol-pentest nmap --version    # Test a tool manually
 ```
 
 ### Permission denied (Linux)
 ```bash
-# Add user to docker group
-sudo usermod -aG docker $USER
+sudo usermod -aG docker $USER    # Add user to docker group
 # Log out and back in
 ```
 
 ## License
 
-MIT - Use at your own risk. Only test systems you own or have explicit permission to test.
+MIT — Use at your own risk. Only test systems you own or have explicit permission to test.
 
 ## Credits
 
-Based on the AIDA (AI-Driven Security Assessment) methodology, simplified for solo developers and direct AI interaction.
+Based on the [AIDA](https://github.com/Vasco0x4/AIDA) (AI-Driven Security Assessment) methodology, simplified for web developers and direct AI interaction.
