@@ -9,35 +9,54 @@ This kit provides a streamlined pentesting workflow with three clear phases:
 2. **Fixes** - Generate prioritized, code-level remediation guidance  
 3. **Verify** - Re-test to confirm vulnerabilities are resolved
 
+## Prerequisites
+
+You need **Docker**, **Python 3**, **Git**, and an **AI coding agent** (Claude Code, opencode, etc.).
+
+| | Linux (recommended) | macOS | Windows |
+|---|---|---|---|
+| **Docker** | [Docker Engine](https://docs.docker.com/engine/install/) | [OrbStack](https://orbstack.dev/) (recommended) or [Docker Desktop](https://docs.docker.com/desktop/install/mac-install/) | [Docker Desktop](https://docs.docker.com/desktop/install/windows-install/) (requires WSL 2) |
+| **Python 3 + pipx** | `sudo apt install python3 pipx` | `brew install python3 pipx` | [python.org](https://www.python.org/downloads/) + `pip install pipx` |
+| **Git** | `sudo apt install git` | `brew install git` | [Git for Windows](https://git-scm.com/download/win) |
+
+> **Platform notes:**
+> - **Linux** is recommended for best performance and full compatibility with Exegol.
+> - **macOS**: Works well. OrbStack is preferred over Docker Desktop for performance.
+> - **Windows**: Run from a **WSL 2** terminal for best compatibility. Docker Desktop must have the WSL 2 backend enabled.
+> - **macOS & Windows**: Docker Desktop has limitations with host network interfaces and USB device access, which may affect some scan types (e.g., certain nmap raw socket scans). See the [Exegol docs](https://docs.exegol.com/first-install/) for details.
+
 ## Quick Start
 
-### 1. Setup Exegol
+### 1. Clone the Repository
 
 ```bash
-# Run the setup script
-./setup.sh
+git clone https://github.com/co-l/simple-pentest.git
+cd simple-pentest
+```
 
-# Or manually:
-# Install Exegol if not already installed
-pip3 install exegol
+### 2. Install & Start Exegol
 
-# Start the pentesting container
+Follow the official Exegol installation guide for your platform: **https://docs.exegol.com/first-install/**
+
+Once Exegol is installed, start the pentesting container:
+
+```bash
 exegol start pentest
-
 # Select 'web' or 'full' image when prompted
 ```
 
-### 2. Launch Your AI Agent
+### 3. Launch Your AI Agent
 
 ```bash
-# Inside the Exegol container, navigate to this directory
-cd /path/to/simple-pentest
-
-# Launch your AI agent CLI (e.g., opencode, Claude Code, etc.)
-opencode
+# On your host machine, from the simple-pentest directory
+opencode  # or claude, aider, etc.
 ```
 
-### 3. Start Pentesting
+> **Note:** You run your AI agent on the host machine, not inside the Exegol container.
+> The container just needs to be running in the background — the AI reaches its pentesting
+> tools via `docker exec exegol-pentest <command>`.
+
+### 4. Start Pentesting
 
 Use this prompt to begin:
 
@@ -60,7 +79,7 @@ The AI conducts a 4-phase security assessment:
 - **Vulnerability Assessment** - Test for SQLi, XSS, IDOR, auth bypass, etc.
 - **Exploitation** - Validate findings with proof-of-concept
 
-**Output**: `{project}_pentest_findings.md`
+**Output**: `reports/{project}_pentest_findings.md`
 
 ### Phase 2: Fixes
 
@@ -79,7 +98,7 @@ The AI will:
 - Generate code-level fixes with examples
 - Prioritize by severity (Critical → High → Medium → Low)
 
-**Output**: `{project}_pentest_fixes.md`
+**Output**: `reports/{project}_pentest_fixes.md`
 
 ### Phase 3: Implementation
 
@@ -90,7 +109,7 @@ Take the fixes file to your project and implement all recommendations.
 Return to your **original pentest AI session** and use the verification prompt provided earlier:
 
 ```
-Verify all findings from {project}_pentest_findings.md
+Verify all findings from reports/{project}_pentest_findings.md
 ```
 
 The AI will:
@@ -106,8 +125,8 @@ The AI will:
 | File | Purpose |
 |------|---------|
 | `README.md` | This file - setup and workflow guide |
-| `setup.sh` | Exegol container setup script |
 | `templates/findings_template.md` | Report structure template |
+| `reports/` | Output directory for pentest findings and fixes (gitignored) |
 
 ### For AI (Prompts)
 
@@ -154,12 +173,12 @@ The AI auto-detects common frameworks for better fix recommendations:
 ## Example Session
 
 ```bash
-# Terminal 1: Setup
-$ ./setup.sh
-[*] Starting Exegol container 'pentest'...
+# Setup (run once)
+$ exegol start pentest   # select 'web' or 'full' image
 [*] Container ready
 
-# Terminal 1: Launch your AI agent
+# Launch your AI agent on the host machine
+$ cd /path/to/simple-pentest
 $ opencode  # or claude, aider, etc.
 
 # In your AI agent:
@@ -174,10 +193,10 @@ You: https://api.leangraph.io
 AI: Is this a development or production environment?
 You: dev
 
-[AI conducts 4-phase pentest...]
+[AI conducts 4-phase pentest, running tools via docker exec exegol-pentest...]
 
-AI: Pentest complete. Generated leangraph_pentest_findings.md
-    Now look at FIXES.md to generate fix recommendations.
+AI: Pentest complete. Generated reports/leangraph_pentest_findings.md
+    Now look at prompts/02-fixes.md to generate fix recommendations.
 
 # Terminal 2: New AI agent session for fixes
 $ opencode  # or claude, aider, etc.
@@ -187,12 +206,12 @@ $ opencode  # or claude, aider, etc.
 
 [AI analyzes source code and generates fixes...]
 
-AI: Generated leangraph_pentest_fixes.md with prioritized fixes
+AI: Generated reports/leangraph_pentest_fixes.md with prioritized fixes
 
 # You implement fixes in your project...
 
 # Terminal 1: Back to original session
-> Verify all findings from leangraph_pentest_findings.md
+> Verify all findings from reports/leangraph_pentest_findings.md
 
 [AI re-tests all findings...]
 
@@ -206,11 +225,7 @@ AI: Verification complete:
 
 ## Troubleshooting
 
-### Exegol not found
-```bash
-pip3 install --user exegol
-# Or: pip3 install exegol
-```
+For Exegol installation issues, see the [official docs](https://docs.exegol.com/first-install/).
 
 ### Container won't start
 ```bash
@@ -220,13 +235,22 @@ docker info
 # List existing Exegol containers
 exegol info
 
-# Remove conflicting container
+# Remove conflicting container and recreate
 exegol stop pentest
 exegol remove pentest
 exegol start pentest
 ```
 
-### Permission denied
+### Tools not responding via docker exec
+```bash
+# Verify the container is running
+docker ps | grep exegol-pentest
+
+# Test a tool manually
+docker exec exegol-pentest nmap --version
+```
+
+### Permission denied (Linux)
 ```bash
 # Add user to docker group
 sudo usermod -aG docker $USER

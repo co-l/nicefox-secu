@@ -2,6 +2,16 @@
 
 Quick reference for common pentesting tools available in Exegol.
 
+> **Execution model:** All tools listed here run inside the Exegol container. Prefix every command with `docker exec exegol-pentest`. For example:
+> ```bash
+> docker exec exegol-pentest nmap -sV target.com
+> ```
+> Wordlist paths (e.g., `/usr/share/wordlists/...`) are paths inside the container and are valid as-is within the `docker exec` call.
+>
+> Prefer stdout output over file-writing flags (`-oN`, `-o`, `--output-dir`). To save output, redirect on the host: `docker exec exegol-pentest nmap -sV target.com > reports/nmap_scan.txt`
+>
+> Standard host tools (`curl`, `jq`, `base64`, `python3`) can be run directly without `docker exec`.
+
 ## Reconnaissance Tools
 
 ### nmap - Network Scanner
@@ -469,22 +479,15 @@ for endpoint in /api/v1/users /api/v1/admin /api/swagger.json /api/docs /graphql
 ## Output Management
 
 ```bash
-# Create organized output directory
-mkdir -p pentest-results/{recon,exploits,loot,notes}
-
-# Save all commands run
-script pentest-results/commands.log
-
-# Organize findings
-tree pentest-results/
-
-# Create summary
-cat pentest-results/*/findings.txt > pentest-results/summary.txt
+# Reports are saved on the host in the reports/ directory
+# Tool output should be captured via stdout and redirected as needed:
+docker exec exegol-pentest nmap -sV target.com > reports/nmap_scan.txt
+docker exec exegol-pentest subfinder -d target.com -silent > reports/subdomains.txt
 ```
 
 ## Tips
 
-1. **Always save output** - Use `-o`, `>`, or `tee` to save results
+1. **Always save output** - Redirect stdout on the host side (`> reports/file.txt`) to save results
 2. **Use multiple tools** - Don't rely on a single tool's results
 3. **Check wordlists** - Ensure you're using appropriate wordlists for the target
 4. **Rate limiting** - Add delays (`-rate` in ffuf, `-t` in gobuster) to avoid DoS

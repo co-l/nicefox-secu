@@ -89,7 +89,7 @@ Testing was conducted in a {dev/production} environment with {full/limited} test
 
 #### Remediation
 
-{High-level remediation guidance. Detailed code fixes are in {project}_pentest_fixes.md}
+{High-level remediation guidance. Detailed code fixes are in reports/{project}_pentest_fixes.md}
 
 #### References
 
@@ -218,9 +218,9 @@ The findings represent a point-in-time assessment and may not reflect the curren
 ## Next Steps
 
 1. **Review Findings** - Examine all vulnerabilities and their severity
-2. **Generate Fixes** - Run: "Look at FIXES.md and generate fix recommendations for {project}"
-3. **Implement Fixes** - Apply code fixes from {project}_pentest_fixes.md
-4. **Verify Fixes** - Return to this session and run: "Verify all findings from {project}_pentest_findings.md"
+2. **Generate Fixes** - Run: "Look at prompts/02-fixes.md and generate fix recommendations for {project}"
+3. **Implement Fixes** - Apply code fixes from reports/{project}_pentest_fixes.md
+4. **Verify Fixes** - Return to this session and run: "Verify all findings from reports/{project}_pentest_findings.md"
 
 ---
 
