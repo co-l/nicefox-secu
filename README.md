@@ -1,6 +1,6 @@
 # NiceFox Secu
 
-AI-powered pentesting for web developers. Find vulnerabilities, fix them in your code, verify the fixes — all in one session.
+AI-powered security review for web developers. Find vulnerabilities, fix them in your code, verify the fixes — all in one session.
 
 Zero security experience needed. Works with **any AI coding agent**: Claude Code, Codex, opencode, Cursor, Kimi, aider...
 
@@ -16,20 +16,20 @@ From **your project directory**:
 npx nicefox-secu
 ```
 
-On first run, this builds the security toolkit (~400MB Docker image, takes ~2-3 min once).
+On first run, this builds the security toolkit (~1GB Docker image, takes ~2-3 min once).
 
-### 2. Start the Pentest
+### 2. Start the Security Review
 
 Open your AI coding agent and paste:
 
 ```
-Read ~/.nicefox-secu/PENTEST.md and start the pentest
+Read ~/.nicefox/REVIEW.md and start the security review
 ```
 
 The AI will:
 1. **Auto-detect** your framework, target URL, and environment (dev/prod)
 2. **Ask you to confirm** — one question instead of a setup wizard
-3. **Pentest** your app (recon, endpoint mapping, vulnerability testing)
+3. **Review** your app (recon, endpoint mapping, vulnerability testing)
 4. **Fix** each vulnerability directly in your source code
 5. **Verify** each fix by re-testing
 6. **Print a summary** of what was found and fixed
@@ -48,7 +48,7 @@ $ cd ~/projects/my-express-api
 $ npx nicefox-secu
 
   NiceFox Secu
-  AI-powered pentesting for web developers
+  AI-powered security review for web developers
 
   ✓ Docker is running
   ✓ Security toolkit image ready
@@ -57,14 +57,14 @@ $ npx nicefox-secu
 
   Ready! Open your AI coding agent from your project directory and paste:
 
-    Read ~/.nicefox-secu/PENTEST.md and start the pentest
+    Read ~/.nicefox/REVIEW.md and start the security review
 
 $ claude  # or opencode, cursor, codex, aider...
 
-> Read ~/.nicefox-secu/PENTEST.md and start the pentest
+> Read ~/.nicefox/REVIEW.md and start the security review
 
 AI: Detected: Express.js project, target http://localhost:3000, dev mode.
-    Start the pentest? (Y/n)
+    Start the security review? (Y/n)
 
 You: Y
 

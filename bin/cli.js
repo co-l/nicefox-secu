@@ -9,9 +9,9 @@ const os = require('os');
 // --- Config ---
 const IMAGE_NAME = 'nicefox-tools';
 const CONTAINER_NAME = 'nicefox-tools';
-const HOME_DIR = path.join(os.homedir(), '.nicefox-secu');
-const PROMPT_SRC = path.join(__dirname, '..', 'prompt', 'PENTEST.md');
-const PROMPT_DEST = path.join(HOME_DIR, 'PENTEST.md');
+const HOME_DIR = path.join(os.homedir(), '.nicefox');
+const PROMPT_SRC = path.join(__dirname, '..', 'prompt', 'REVIEW.md');
+const PROMPT_DEST = path.join(HOME_DIR, 'REVIEW.md');
 const DOCKERFILE = path.join(__dirname, '..', 'docker', 'Dockerfile');
 
 // --- Colors ---
@@ -48,7 +48,7 @@ function ask(question) {
 async function main() {
   console.log('');
   console.log(bold('  NiceFox Secu'));
-  console.log(dim('  AI-powered pentesting for web developers'));
+  console.log(dim('  AI-powered security review for web developers'));
   console.log('');
 
   // --- Step 1: Check Docker ---
@@ -149,7 +149,7 @@ async function main() {
   console.log('');
   console.log(`  ${bold('Ready!')} Open your AI coding agent from your project directory and paste:`);
   console.log('');
-  console.log(`    ${cyan(`Read ${PROMPT_DEST} and start the pentest`)}`);
+  console.log(`    ${cyan(`Read ${PROMPT_DEST} and start the security review`)}`);
   console.log('');
   console.log(dim('  Works with Claude Code, Codex, opencode, Cursor, Kimi, aider...'));
   console.log('');
