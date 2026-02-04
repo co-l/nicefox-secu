@@ -78,14 +78,17 @@ if (containerRunning === CONTAINER_NAME) {
     console.log(`  ${green('✓')} Exegol container running (${CONTAINER_NAME})`);
   } else {
     // Container doesn't exist at all
-    fail(`Exegol container "${CONTAINER_NAME}" does not exist.
+    fail(`Exegol container "${CONTAINER_NAME}" not found.
 
-  Create it first:
-    ${cyan(`exegol start ${EXEGOL_SESSION}`)}
+  Set it up in 2 steps:
 
-  If Exegol is not installed:
-    ${cyan('pip install exegol')}
-    ${cyan('exegol install')}
+  ${bold('1. Install Exegol (one-time):')}
+     ${cyan('https://docs.exegol.com/first-install')}
+
+  ${bold('2. Create the container:')}
+     ${cyan(`exegol start ${EXEGOL_SESSION}`)}
+     When prompted, select the ${bold("'free'")} image (community)
+     or ${bold("'web'/'full'")} if you have a Pro subscription.
 
   Then run ${cyan('npx nicefox-secu')} again.`);
   }

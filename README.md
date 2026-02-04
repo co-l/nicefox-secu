@@ -10,18 +10,15 @@ Based on the [AIDA](https://github.com/Vasco0x4/AIDA) methodology.
 
 ### 1. Install Exegol (one-time)
 
-[Exegol](https://exegol.readthedocs.io/) is a Docker-based pentesting toolbox. Install it once:
+[Exegol](https://exegol.readthedocs.io/) is a Docker-based pentesting toolbox with 400+ security tools.
 
-```bash
-pip install exegol
-exegol install
-```
+Follow the official installation guide: **https://docs.exegol.com/first-install**
 
 Then create the container:
 
 ```bash
 exegol start nicefox
-# Select the 'free' image (community), or 'web'/'full' if you have a Pro subscription
+# Select 'free' (community), or 'web'/'full' if you have a Pro subscription
 ```
 
 ### 2. Run NiceFox Secu
