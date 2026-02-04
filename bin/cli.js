@@ -45,7 +45,24 @@ function ask(question) {
   });
 }
 
+// --- Helpers ---
+const PROJECT_MARKERS = [
+  'package.json', 'requirements.txt', 'pyproject.toml', 'Pipfile',
+  'go.mod', 'pom.xml', 'build.gradle', 'Gemfile', 'composer.json', 'Cargo.toml'
+];
+
+function isUrl(str) {
+  return /^https?:\/\/.+/i.test(str);
+}
+
+function hasProjectFiles() {
+  return PROJECT_MARKERS.some((f) => fs.existsSync(path.join(process.cwd(), f)));
+}
+
 async function main() {
+  const targetUrl = process.argv[2] && isUrl(process.argv[2]) ? process.argv[2] : null;
+  const productionMode = !!targetUrl;
+
   console.log('');
   console.log(bold('  NiceFox Secu'));
   console.log(dim('  AI-powered security review for web developers'));
@@ -138,16 +155,52 @@ async function main() {
     console.log(`  ${green('✓')} Toolkit container running`);
   }
 
-  // --- Step 4: Install prompt to ~/.nicefox-secu/ ---
+  // --- Step 4: Install prompt to ~/.nicefox/ ---
   if (!fs.existsSync(HOME_DIR)) {
     fs.mkdirSync(HOME_DIR, { recursive: true });
   }
-  fs.copyFileSync(PROMPT_SRC, PROMPT_DEST);
+
+  let prompt = fs.readFileSync(PROMPT_SRC, 'utf-8');
+
+  if (productionMode) {
+    const sourceAvailable = hasProjectFiles();
+    const contextBlock = [
+      '> **Target:** ' + targetUrl,
+      '> **Mode:** production — non-destructive scanning only',
+      '> **Source code:** ' + (sourceAvailable
+        ? 'available — read code to understand the app, apply fixes locally'
+        : 'not available — document recommended fixes only'),
+      '',
+      '> **IMPORTANT:** Before scanning, confirm with the user that they have authorization to test this target.',
+      '',
+    ].join('\n');
+    prompt = contextBlock + prompt;
+  }
+
+  fs.writeFileSync(PROMPT_DEST, prompt);
   console.log(`  ${green('✓')} Prompt installed`);
 
-  // --- Step 5: Print instructions ---
+  // --- Step 5: Authorization warning (production only) ---
+  if (productionMode) {
+    console.log('');
+    console.log(`  ${yellow('⚠')}  ${bold('Production mode:')} ${targetUrl}`);
+    console.log(`  ${yellow('⚠')}  Make sure you have ${bold('written authorization')} to test this target.`);
+    const answer = await ask(`\n  Continue? ${dim('(Y/n)')} `);
+    if (answer === 'n' || answer === 'no') {
+      console.log('');
+      console.log(dim('  Aborted.'));
+      console.log('');
+      process.exit(0);
+    }
+  }
+
+  // --- Step 6: Print instructions ---
   console.log('');
-  console.log(`  ${bold('Ready!')} Open your AI coding agent from your project directory and paste:`);
+  if (productionMode) {
+    console.log(`  ${bold('Ready!')} Open your AI coding agent and paste:`);
+  } else {
+    console.log(`  ${bold('Ready!')} Open your AI coding agent from your project directory and paste:`);
+  }
   console.log('');
   console.log(`    ${cyan(`Read ${PROMPT_DEST} and start the security review`)}`);
   console.log('');

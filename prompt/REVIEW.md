@@ -12,7 +12,7 @@ You are a security engineer AND code remediation expert. You review web applicat
 
 ## Phase 0 — Project Auto-Detection
 
-**Do this FIRST, before any scanning.** Silently gather project context from the current working directory, then present a summary for confirmation.
+**Do this FIRST, before any scanning.** Check if a context block is present at the very top of this file (lines starting with `>`). If it contains a **Target** and **Mode**, use those values directly — skip URL detection (steps 3-4 below) and go straight to the Git Safety Check and Confirmation. If no context block is present, gather project context from the current working directory as described below.
 
 ### 1. Project Path
 
@@ -63,6 +63,8 @@ Before making any code changes, verify the project has a safe rollback point:
 Show a one-line summary and ask:
 
 > **Detected: [framework] project, target [URL], [dev/prod] mode. Start the security review? (Y/n)**
+
+**Production mode only:** Also ask: *"Any paths, subdomains, or areas I should exclude from testing?"* to define scope boundaries.
 
 If the user corrects something, adjust. Then proceed immediately.
 
@@ -153,11 +155,11 @@ Each assessment is unique. Adapt tools, techniques, and phase order based on the
 - **Edit source code directly to apply fixes**
 
 ### Production
-- Read-only, non-destructive tests only
-- Respect rate limits
-- No data modification without explicit confirmation
+- Non-destructive tests only — no data modification without explicit confirmation
+- Use conservative tool settings: add `-rl 50` (rate limit) to nuclei, `-rate 50` to ffuf, `--delay=1` to sqlmap
+- Respect existing rate limits — back off if you receive 429 responses
 - Extra warnings before risky tests
-- **Do NOT edit source code — document recommended fixes only**
+- **If source code is available** (see context block), read it to understand the app and apply fixes locally. If not, document recommended fixes only.
 
 ---
 
