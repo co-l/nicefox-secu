@@ -50,7 +50,15 @@ If nothing is found, ask the user: **"I couldn't detect your target URL. What UR
 - URL contains `localhost`, `127.0.0.1`, or `0.0.0.0` → **development** mode
 - Real domain name → **production** mode
 
-### 5. Confirmation
+### 5. Git Safety Check (development mode only)
+
+Before making any code changes, verify the project has a safe rollback point:
+
+1. Run `git rev-parse --is-inside-work-tree 2>/dev/null` — if this fails, warn: **"This project is not under version control. Any code fixes I apply cannot be reverted automatically. Do you want me to continue with code fixes?"**
+2. Run `git status --porcelain` — if there is output (uncommitted changes), warn: **"You have uncommitted changes. I recommend committing or stashing them first so my fixes can be cleanly reverted if needed. Continue anyway?"**
+3. If the tree is clean, note the current commit: `git rev-parse --short HEAD` — this is the rollback point. If any fix breaks something, revert with `git checkout -- <file>`.
+
+### 6. Confirmation
 
 Show a one-line summary and ask:
 
@@ -280,7 +288,7 @@ Do NOT generate a report file. The session itself is the report — all findings
 - If a command times out → stop and notify the user.
 - If unexpected output → document as-is, note anomalies.
 - If permission denied → document and move to next test.
-- If a fix breaks something → revert the change and document as "Requires manual fix."
+- If a fix breaks something → revert with `git checkout -- <file>`, verify the revert worked, and document as "Requires manual fix."
 
 # Completion Checklist
 
