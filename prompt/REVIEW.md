@@ -105,6 +105,10 @@ Use the right tool for each task. Every tool below runs inside the container via
 | XSS testing | **dalfox** | `docker exec nicefox-tools dalfox url "http://localhost:3000/search?q=test"` |
 | JWT analysis & attacks | **jwt_tool** | `docker exec nicefox-tools python3 /opt/jwt_tool/jwt_tool.py <token> -A` |
 | Brute force (auth) | **hydra** | `docker exec nicefox-tools hydra -l admin -P /usr/share/wordlists/seclists/Passwords/10k-most-common.txt localhost http-post-form "/login:user=^USER^&pass=^PASS^:Invalid"` |
+| Web server misconfigurations | **nikto** | `docker exec nicefox-tools nikto -h http://localhost:3000` |
+| SSL/TLS analysis | **testssl** | `docker exec nicefox-tools testssl --quiet https://example.com` |
+| Technology fingerprinting | **whatweb** | `docker exec nicefox-tools whatweb -a 3 http://localhost:3000` |
+| Command injection | **commix** | `docker exec nicefox-tools commix -u "http://localhost:3000/api/ping?host=test" --batch` |
 | HTTP requests & API probing | **httpie** | `docker exec nicefox-tools http GET http://localhost:3000/api/users` |
 
 ### Wordlist Paths (inside the container)
@@ -169,17 +173,17 @@ Each assessment is unique. Adapt tools, techniques, and phase order based on the
 
 DNS, WHOIS, subdomains, tech stack, SSL/TLS, OSINT, port scans, service detection, API documentation discovery (Swagger, OpenAPI, GraphQL introspection).
 
-Use **nmap** for port scanning and service detection. Use **subfinder** for subdomain enumeration (production targets). Use the framework detected in Phase 0 to guide which vulnerabilities to prioritize and how to write fixes.
+Use **nmap** for port scanning and service detection. Use **subfinder** for subdomain enumeration (production targets). Use **whatweb** for technology fingerprinting. Use **testssl** for SSL/TLS analysis (production targets). Use the framework detected in Phase 0 to guide which vulnerabilities to prioritize and how to write fixes.
 
 ## Phase 2 — Mapping
 
 Directories, endpoints, API enumeration, parameter discovery, version detection, authentication mechanism mapping.
 
-Use **ffuf** for directory and endpoint fuzzing. Use **arjun** to discover hidden parameters on interesting endpoints. Use **nuclei** for a broad scan of known CVEs and misconfigurations.
+Use **ffuf** for directory and endpoint fuzzing. Use **arjun** to discover hidden parameters on interesting endpoints. Use **nuclei** for a broad scan of known CVEs and misconfigurations. Use **nikto** for web server misconfiguration scanning.
 
 ## Phase 3 — Vulnerability Assessment & Fix
 
-This is the core phase. Use the specialized tool for each vulnerability type: **sqlmap** for SQL injection, **dalfox** for XSS, **jwt_tool** for JWT attacks, **hydra** for brute force on authentication endpoints. For each potential vulnerability:
+This is the core phase. Use the specialized tool for each vulnerability type: **sqlmap** for SQL injection, **dalfox** for XSS, **commix** for command injection, **jwt_tool** for JWT attacks, **hydra** for brute force on authentication endpoints. For each potential vulnerability:
 
 1. **Test it** — run the exploit/PoC to confirm it's real
 2. **Document it** — add a VULN-NNN entry to the findings report immediately
@@ -216,13 +220,17 @@ This is the core phase. Use the specialized tool for each vulnerability type: **
 Before moving to final verification, confirm you ran every applicable tool. For each one, note the result or justify why it was skipped:
 
 - [ ] **nmap** — port scan & service detection
+- [ ] **whatweb** — technology fingerprinting
 - [ ] **ffuf** — directory & endpoint fuzzing
+- [ ] **nikto** — web server misconfiguration scanning
 - [ ] **nuclei** — known CVEs & misconfigurations
 - [ ] **arjun** — parameter discovery on key endpoints
 - [ ] **sqlmap** — SQL injection on every endpoint accepting user input
 - [ ] **dalfox** — XSS on every endpoint reflecting user input
+- [ ] **commix** — command injection on endpoints passing input to system commands
 - [ ] **jwt_tool** — JWT analysis (if the app uses JWTs)
 - [ ] **hydra** — brute force on login/register endpoints
+- [ ] **testssl** — SSL/TLS analysis (production targets only)
 - [ ] **subfinder** — subdomain enumeration (production targets only)
 
 If a tool was not run, go back and run it now. The only valid reason to skip is "not applicable to this target" (e.g., subfinder on localhost, sqlmap when there are no SQL-backed endpoints).

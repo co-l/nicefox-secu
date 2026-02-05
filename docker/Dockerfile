@@ -7,6 +7,8 @@ LABEL description="NiceFox Secu — lightweight pentesting toolkit for web devel
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nmap \
     hydra \
+    nikto \
+    whatweb \
     curl \
     wget \
     git \
@@ -18,7 +20,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir \
     sqlmap \
     arjun \
-    httpie
+    httpie \
+    commix
+
+# testssl.sh
+RUN git clone --depth 1 https://github.com/drwetter/testssl.sh.git /opt/testssl && \
+    ln -s /opt/testssl/testssl.sh /usr/local/bin/testssl
 
 # jwt_tool
 RUN git clone --depth 1 https://github.com/ticarpi/jwt_tool.git /opt/jwt_tool && \
