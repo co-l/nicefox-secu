@@ -7,14 +7,25 @@ LABEL description="NiceFox Secu — lightweight pentesting toolkit for web devel
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nmap \
     hydra \
-    nikto \
-    whatweb \
     curl \
     wget \
     git \
     unzip \
     procps \
+    perl \
+    libnet-ssleay-perl \
+    ruby \
+    bsdmainutils \
     && rm -rf /var/lib/apt/lists/*
+
+# nikto (Perl-based web server scanner)
+RUN git clone --depth 1 https://github.com/sullo/nikto.git /opt/nikto && \
+    ln -s /opt/nikto/program/nikto.pl /usr/local/bin/nikto
+
+# whatweb (Ruby-based tech fingerprinting)
+RUN git clone --depth 1 https://github.com/urbanadventurer/WhatWeb.git /opt/whatweb && \
+    gem install --no-document addressable && \
+    ln -s /opt/whatweb/whatweb /usr/local/bin/whatweb
 
 # Python tools
 RUN pip install --no-cache-dir \
