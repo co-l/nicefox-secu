@@ -89,10 +89,14 @@ AI: Assessment complete.
 - AI edits your source code directly to fix vulnerabilities
 - Full tool suite
 
-**Production** (auto-detected when target is a real domain):
-- Non-destructive tests only, rate limits respected
-- AI documents recommended fixes but does NOT edit code
-- Extra caution on risky tests
+**Production** — pass the target URL as argument:
+```bash
+npx nicefox-secu https://example.com
+```
+- Non-destructive tests only, rate limits respected, extra caution on risky tests
+- If source code is available locally, AI reads it and applies fixes; otherwise documents recommended fixes only
+- Asks for authorization confirmation before scanning
+- Asks which paths/subdomains to exclude
 
 ## Included Tools
 
@@ -116,7 +120,7 @@ The security toolkit Docker image ships with:
 - **Always** test against a dev/staging environment first
 - **Never** test production systems without explicit authorization
 - **Backup** your code before running (or just use git — you do use git, right?)
-- The AI will **not modify production code** — it only documents fixes in prod mode
+- In prod mode, the AI applies fixes locally if source code is available, or documents them otherwise
 
 ## Troubleshooting
 
